@@ -1,0 +1,110 @@
+package com.example.mocalatte.project1;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import com.kakao.auth.ApiResponseCallback;
+import com.kakao.network.ErrorResult;
+import com.kakao.usermgmt.ApiErrorCode;
+import com.kakao.usermgmt.UserManagement;
+import com.kakao.usermgmt.callback.MeV2ResponseCallback;
+import com.kakao.usermgmt.response.MeV2Response;
+import com.kakao.util.OptionalBoolean;
+import com.kakao.util.helper.log.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class SignUpActivity extends Activity {
+    /**
+     * Main으로 넘길지 가입 페이지를 그릴지 판단하기 위해 me를 호출한다.
+     * @param savedInstanceState 기존 session 정보가 저장된 객체
+     */
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestMe();
+    }
+
+    protected void showSignup() {
+        setContentView(R.layout.activity_sign_up);
+        //final ExtraUserPropertyLayout extraUserPropertyLayout = findViewById(R.id.extra_user_property);
+        Button signupButton = findViewById(R.id.buttonSignup);
+        signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 샘플 테스트 properties.. 이 SignUp 액티비티에서 실제로 앱 운영에 필요한 회원 정보를 입력받아서 HashMap에 저장한 뒤에
+                // 카카오의 signup api를 사용하여 등록해주면 카카오 앱 관리페이지에서 사용자 목록 및 프로퍼티를 확인 할 수있음ㅋ
+                Map<String, String> properties = new HashMap<String, String>();
+                properties.put("nickname", "leo");
+                properties.put("age", "33");
+                requestSignUp(properties);
+            }
+        });
+    }
+
+    private void requestSignUp(final Map<String, String> properties) {
+        UserManagement.getInstance().requestSignup(new ApiResponseCallback<Long>() {
+            @Override
+            public void onNotSignedUp() {
+            }
+
+            @Override
+            public void onSuccess(Long result) {
+                requestMe();
+            }
+
+            @Override
+            public void onFailure(ErrorResult errorResult) {
+                final String message = "UsermgmtResponseCallback : failure : " + errorResult;
+                com.kakao.util.helper.log.Logger.w(message);
+                //KakaoToast.makeToast(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                finish();
+            }
+
+            @Override
+            public void onSessionClosed(ErrorResult errorResult) {
+            }
+        }, properties);
+    }
+
+    /**
+     * 사용자의 상태를 알아 보기 위해 me API 호출을 한다.
+     */
+    protected void requestMe() {
+        UserManagement.getInstance().me(new MeV2ResponseCallback() {
+            @Override
+            public void onFailure(ErrorResult errorResult) {
+                String message = "failed to get user info. msg=" + errorResult;
+                Logger.d(message);
+
+                int result = errorResult.getErrorCode();
+                if (result == ApiErrorCode.CLIENT_ERROR_CODE) {
+                    //KakaoToast.makeToast(getApplicationContext(), getString(R.string.error_message_for_service_unavailable), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, "Service is unavailable...", Toast.LENGTH_SHORT).show();
+                } else {
+                    GlobalApplication.redirectLoginActivity(SignUpActivity.this);
+                }
+            }
+
+            @Override
+            public void onSessionClosed(ErrorResult errorResult) {
+                Logger.e("onSessionClosed");
+                GlobalApplication.redirectLoginActivity(SignUpActivity.this);
+            }
+
+            @Override
+            public void onSuccess(MeV2Response result) {
+                if (result.hasSignedUp() == OptionalBoolean.FALSE) {
+                    showSignup();
+                } else {
+                    GlobalApplication.redirectMainActivity(SignUpActivity.this);
+                }
+            }
+        });
+    }
+
+}
