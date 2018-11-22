@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
+import com.facebook.stetho.Stetho;
 import com.kakao.auth.ApprovalType;
 import com.kakao.auth.AuthType;
 import com.kakao.auth.IApplicationConfig;
@@ -66,7 +67,7 @@ public class GlobalApplication extends Application {
         super.onCreate();
         context = this;
         KakaoSDK.init(new KakaoSDKAdapter());
-
+        Stetho.initializeWithDefaults(this);
     }
 
     public static void redirectLoginActivity(Context context){

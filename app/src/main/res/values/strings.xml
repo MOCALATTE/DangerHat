@@ -2,4 +2,6 @@
     <string name="app_name">위험햇</string>
 
     <string name="kakao_app_key">b6652844936d64600404c04a38e0c67f</string>
+
+    <string name="default_notification_channel_id">default_notification_channel_id</string>
 </resources>
