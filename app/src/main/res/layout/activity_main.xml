@@ -28,7 +28,8 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="gps전송"/>
+                android:text="gpsgps_test"
+                android:id="@+id/gpsgps_test"/>
         </LinearLayout>
 
         <RelativeLayout
