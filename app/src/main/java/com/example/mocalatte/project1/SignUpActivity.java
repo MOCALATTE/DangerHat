@@ -1,22 +1,25 @@
 package com.example.mocalatte.project1;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.mocalatte.project1.network.JoinServiceThread;
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.ApiErrorCode;
 import com.kakao.usermgmt.UserManagement;
 import com.kakao.usermgmt.callback.MeV2ResponseCallback;
 import com.kakao.usermgmt.response.MeV2Response;
-import com.kakao.util.OptionalBoolean;
 import com.kakao.util.helper.log.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class SignUpActivity extends Activity {
     /**
@@ -30,6 +33,7 @@ public class SignUpActivity extends Activity {
     }
 
     protected void showSignup() {
+        Log.e("showSignup", "showSignupshowSignup");
         setContentView(R.layout.activity_sign_up);
         //final ExtraUserPropertyLayout extraUserPropertyLayout = findViewById(R.id.extra_user_property);
         Button signupButton = findViewById(R.id.buttonSignup);
@@ -98,9 +102,49 @@ public class SignUpActivity extends Activity {
 
             @Override
             public void onSuccess(MeV2Response result) {
-                if (result.hasSignedUp() == OptionalBoolean.FALSE) {
+                /*if (result.hasSignedUp() == OptionalBoolean.FALSE) {
                     showSignup();
                 } else {
+                    GlobalApplication.redirectMainActivity(SignUpActivity.this);
+                }*/
+                long meresultid = result.getId();
+
+                SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                long storedid = sp.getLong("id", -1);
+                String storedpushtoken = sp.getString("token", null);
+
+                // 한번도 로그인한 적이 없거나 로컬에 저장내역이 카카오api 정보와 다를 경우..
+                if(storedid == -1  || storedid != meresultid){
+                    // 앱 설치한지 금방이라 푸시 토큰이 아직 생성되지 않은 경우..
+                    if(storedpushtoken == null){
+                        Toast.makeText(SignUpActivity.this, "푸시 기능을 위한 토큰이 아직 발급되지 않았습니다.\n잠시후에 다시 시도해보세요.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                    else{
+                        try {
+                            // 서버에 정보 등록 요청..
+                            JoinServiceThread joinServiceThread = new JoinServiceThread(SignUpActivity.this, meresultid, "android", storedpushtoken);
+                            JoinServiceThread.Repo repo = joinServiceThread.execute().get();
+
+                            // 서버에 저장 완료했거나 이미 저장된 유저..
+                            if( repo.getMsg().equals("success")
+                                    || ( repo.getMsg().equals("fail") && repo.getReason().equals("alreadyExist") )
+                                    )
+                            {
+                                SharedPreferences.Editor editor = sp.edit();
+                                editor.putLong("id", meresultid);
+                                editor.commit();
+
+                                GlobalApplication.redirectMainActivity(SignUpActivity.this);
+                            }
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                else{
                     GlobalApplication.redirectMainActivity(SignUpActivity.this);
                 }
             }
