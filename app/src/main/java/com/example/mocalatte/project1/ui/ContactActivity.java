@@ -9,12 +9,13 @@ import android.view.ViewGroup;
 
 import com.example.mocalatte.project1.R;
 
-public class MoreActivity extends Fragment {
+public class ContactActivity extends Fragment {
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.more_layout, container, false);
+        View v = inflater.inflate(R.layout.contact_layout, container, false);
         return v;
     }
 }
