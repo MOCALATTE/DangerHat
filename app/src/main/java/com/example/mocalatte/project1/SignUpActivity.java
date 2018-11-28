@@ -123,7 +123,7 @@ public class SignUpActivity extends Activity {
                     else{
                         try {
                             // 서버에 정보 등록 요청..
-                            JoinServiceThread joinServiceThread = new JoinServiceThread(SignUpActivity.this, meresultid, "android", storedpushtoken);
+                            JoinServiceThread joinServiceThread = new JoinServiceThread(SignUpActivity.this, meresultid, "kakao", storedpushtoken);
                             JoinServiceThread.Repo repo = joinServiceThread.execute().get();
 
                             // 서버에 저장 완료했거나 이미 저장된 유저..

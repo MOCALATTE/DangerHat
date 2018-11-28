@@ -1,7 +1,7 @@
 package com.example.mocalatte.project1;
 
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -13,7 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.example.mocalatte.project1.network.UpdateGPSThread;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -66,8 +68,14 @@ public class MainActivity extends AppCompatActivity {
         btn_gpsgps_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
+                if(mLocationPermissionGranted == true){
+                    /*Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                    startActivity(intent);*/
+                    updateLocationData();
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "권한이 없습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -105,6 +113,16 @@ public class MainActivity extends AppCompatActivity {
                             mLastKnownLocation = task.getResult();
                             Log.e("lat : ", mLastKnownLocation.getLatitude()+"");
                             Log.e("lng : ", mLastKnownLocation.getLongitude()+"");
+                            Toast.makeText(MainActivity.this, "lat : "+mLastKnownLocation.getLatitude()+"\n"
+                                + "lng : "+mLastKnownLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                            // 서버에 업데이트.
+                            SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                            long storedid = sp.getLong("id", -1);
+                            if(storedid != -1){
+                                UpdateGPSThread updateGPSThread = new UpdateGPSThread(MainActivity.this, storedid, mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()) ;
+                                updateGPSThread.execute();
+                            }
                         } else {
                             Log.d("TASK IS NOT SUCCESSED", "Current location is null. Using defaults.");
                             Log.e("TASK IS NOT SUCCESSED", "Exception: %s", task.getException());
