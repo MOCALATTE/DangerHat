@@ -3,6 +3,7 @@ package com.example.mocalatte.project1.ui;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import com.facebook.stetho.Stetho;
 import com.kakao.auth.ApprovalType;
@@ -74,6 +75,8 @@ public class GlobalApplication extends Application {
     }
 
     public static void redirectLoginActivity(Context context){
+        SharedPreferences sp = context.getSharedPreferences("login", MODE_PRIVATE);
+        sp.edit().remove("id").commit();
         Intent intent = new Intent(context, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         context.startActivity(intent);
