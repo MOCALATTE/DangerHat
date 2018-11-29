@@ -1,4 +1,4 @@
-package com.example.mocalatte.project1;
+package com.example.mocalatte.project1.ui;
 
 import android.app.Application;
 import android.content.Context;
@@ -80,7 +80,7 @@ public class GlobalApplication extends Application {
     }
 
     public static void redirectMainActivity(Context context) {
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         context.startActivity(intent);
     }

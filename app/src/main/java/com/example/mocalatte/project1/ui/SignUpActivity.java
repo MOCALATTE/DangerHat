@@ -1,4 +1,4 @@
-package com.example.mocalatte.project1;
+package com.example.mocalatte.project1.ui;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.mocalatte.project1.R;
 import com.example.mocalatte.project1.network.JoinServiceThread;
 import com.kakao.auth.ApiResponseCallback;
 import com.kakao.network.ErrorResult;

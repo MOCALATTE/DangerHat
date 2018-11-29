@@ -1,4 +1,4 @@
-package com.example.mocalatte.project1;
+package com.example.mocalatte.project1.ui;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.example.mocalatte.project1.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;

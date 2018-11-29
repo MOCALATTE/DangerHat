@@ -8,20 +8,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mocalatte.project1.R;
-import com.example.mocalatte.project1.item.ItemSlideMenu;
+import com.example.mocalatte.project1.item.FriendListMenu;
 
 import java.util.List;
 
-public class SlidingMenuAdapter extends BaseAdapter {
+public class FriendListAdapter extends BaseAdapter {
     private Context context;
-    private List<ItemSlideMenu> lstItem;
+    private List<FriendListMenu> lstItem;
 
-    public SlidingMenuAdapter(Context context, List<ItemSlideMenu> lstItem) {
+    public FriendListAdapter(Context context, List<FriendListMenu> lstItem) {
         this.context = context;
-        this.lstItem = lstItem;
-    }
-
-    public SlidingMenuAdapter(List<ItemSlideMenu> lstItem) {
         this.lstItem = lstItem;
     }
 
@@ -42,14 +38,15 @@ public class SlidingMenuAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View v = View.inflate(context, R.layout.item_sliding_menu, null);
-        ImageView img = (ImageView)v.findViewById(R.id.item_img);
-        TextView tv = (TextView)v.findViewById(R.id.item_title);
+        if(convertView == null){
+            convertView = View.inflate(context, R.layout.item_sliding_menu, null);
+        }
+        TextView name = (TextView)convertView.findViewById(R.id.friend_name);
+        TextView contact = (TextView)convertView.findViewById(R.id.friend_contactnum);
+        FriendListMenu item = lstItem.get(position);
+        name.setText(item.getName());
+        contact.setText(item.getContactnum());
 
-        ItemSlideMenu item = lstItem.get(position);
-        img.setImageResource(item.getImgId());
-        tv.setText(item.getTitle());
-
-        return v;
+        return convertView;
     }
 }

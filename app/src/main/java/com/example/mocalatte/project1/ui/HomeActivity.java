@@ -1,21 +1,41 @@
 package com.example.mocalatte.project1.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ListView;
 
 import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.adapter.FriendListAdapter;
+import com.example.mocalatte.project1.item.FriendListMenu;
+
+import java.util.ArrayList;
 
 
-public class HomeActivity extends Fragment {
-    @Nullable
+public class HomeActivity extends Activity {
+
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.home_layout);
 
-        View v = inflater.inflate(R.layout.home_layout, container, false);
-        return v;
+        ArrayList<FriendListMenu> fff = new ArrayList<>();
+        for(int i=0; i<5; i++)
+            fff.add(new FriendListMenu("홍길동", i+""));
+
+        ListView friendList = (ListView)findViewById(R.id.friendlist);
+        FriendListAdapter friendListAdapter = new FriendListAdapter(this, fff);
+        friendList.setAdapter(friendListAdapter);
+
+        ImageButton requestbtn = (ImageButton)findViewById(R.id.requestbutton);
+        requestbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 }

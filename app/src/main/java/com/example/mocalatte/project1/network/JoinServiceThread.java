@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.mocalatte.project1.GlobalApplication;
+import com.example.mocalatte.project1.ui.GlobalApplication;
 import com.google.gson.annotations.SerializedName;
 
 import org.json.JSONException;

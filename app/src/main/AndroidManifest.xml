@@ -10,14 +10,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".GlobalApplication"
+        android:name=".ui.GlobalApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity">
+        <activity android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,17 +34,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".MainActivity" />
-
-        <activity android:name=".ui.FragActivity" android:screenOrientation="portrait" >
-            <!--<intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
-        </activity>
-
+        <activity android:name=".ui.SignUpActivity" />
+        <activity android:name=".ui.MainActivity" />
+        <activity android:name=".ui.HomeActivity" ></activity>
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
@@ -89,7 +81,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"></activity>
+            android:name=".ui.MapsActivity"></activity>
     </application>
 
 </manifest>
