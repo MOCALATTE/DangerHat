@@ -1,6 +1,5 @@
 package com.example.mocalatte.project1.network;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -31,7 +30,7 @@ public class UpdateGPSThread extends AsyncTask<Void, Void, UpdateGPSThread.Repo>
     double lat;
     double lng;
 
-    ProgressDialog pDialog;
+    //ProgressDialog pDialog;
 
     JSONObject jsonObject;
 
@@ -45,11 +44,11 @@ public class UpdateGPSThread extends AsyncTask<Void, Void, UpdateGPSThread.Repo>
     @Override
     protected void onPreExecute() {
 
-        pDialog = new ProgressDialog(context);
+        /*pDialog = new ProgressDialog(context);
         pDialog.setMessage("작업중..");
         pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         pDialog.setCancelable(false);
-        pDialog.show();
+        pDialog.show();*/
 
         jsonObject = new JSONObject();
         try {
@@ -103,7 +102,7 @@ public class UpdateGPSThread extends AsyncTask<Void, Void, UpdateGPSThread.Repo>
 
     @Override
     protected void onPostExecute(Repo rpo) {
-        pDialog.dismiss();
+        //pDialog.dismiss();
         super.onPostExecute(rpo);
         if(rpo!= null){
 

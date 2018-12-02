@@ -1,18 +1,34 @@
 package com.example.mocalatte.project1.ui;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
 import com.example.mocalatte.project1.adapter.FriendListAdapter;
 import com.example.mocalatte.project1.item.FriendListMenu;
 import com.example.mocalatte.project1.service.RealService;
+import com.kakao.network.ErrorResult;
+import com.kakao.usermgmt.UserManagement;
+import com.kakao.usermgmt.callback.LogoutResponseCallback;
+import com.kakao.usermgmt.callback.UnLinkResponseCallback;
+import com.kakao.util.helper.log.Logger;
 
 import java.util.ArrayList;
 
@@ -22,10 +38,34 @@ public class HomeActivity extends Activity {
     //HomeKeyReceiver homeKeyReceiver;
     private Intent serviceIntent;
 
+    private boolean mLocationPermissionGranted;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_layout);
+
+        Button btn_logout = (Button)findViewById(R.id.button_logout);
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
+                    @Override
+                    public void onCompleteLogout() {
+                        onClickLogout();
+                    }
+                });
+            }
+        });
+
+        Button btn_unlink = (Button)findViewById(R.id.button_unlink);
+        btn_unlink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickUnlink();
+            }
+        });
 
         ArrayList<FriendListMenu> fff = new ArrayList<>();
         for(int i=0; i<5; i++)
@@ -39,9 +79,43 @@ public class HomeActivity extends Activity {
         requestbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                boolean state = sp.getBoolean("home_request_ok", false);
+                sp.edit().putBoolean("home_request_ok", !state).commit();
+                initRequestBtnState();
 
+                if(!state == true){
+                    Toast.makeText(HomeActivity.this, "앞으로 홈버튼을 7번 연속으로 클릭하시면 위험 알림을 발송하게 됩니다.", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(HomeActivity.this, "홈버튼을 통한 위험 알림 발송기능을 중지합니다.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+        initRequestBtnState();
+
+        final Switch push_switch = (Switch)findViewById(R.id.push_switch);
+        push_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                //boolean state = sp.getBoolean("push_switch", true);
+                sp.edit().putBoolean("push_switch", push_switch.isChecked()).commit();
+                initPushSwitchState();
+
+                if(push_switch.isChecked()){
+                    Toast.makeText(HomeActivity.this, "다른사람의 위험 요청 푸시를 수신합니다.", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(HomeActivity.this, "다른사람의 위험 요청 푸시를 수신하지 않습니다.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        initPushSwitchState();
+
+        //
+
+        getLocationPermission();
 
         if (RealService.serviceIntent==null) {
             serviceIntent = new Intent(this, RealService.class);
@@ -59,6 +133,92 @@ public class HomeActivity extends Activity {
             stopService(serviceIntent);
             serviceIntent = null;
         }
+    }
+
+    // 홈버튼 연속 클릭으로 자신의 위험을 알릴 것인지 아닌지를 결정하는 버튼 설정..
+    // 현재 SharedPreferences에 저장된 값에 따라 on/off 상태를 표시함.
+    public void initRequestBtnState(){
+        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+        boolean state = sp.getBoolean("home_request_ok", false);
+        ImageButton requestbtn = (ImageButton)findViewById(R.id.requestbutton);
+
+        if(state == true){
+            Log.e("home_request_ok : ", "true");
+            requestbtn.setImageResource(R.drawable.on);
+            sp.edit().putBoolean("home_request_ok", true).commit();
+        }
+        else{
+            Log.e("home_request_ok : ", "false");
+            requestbtn.setImageResource(R.drawable.off);
+            sp.edit().putBoolean("home_request_ok", false).commit();
+        }
+    }
+    // 위험 요청 수신여부 Switch 설정..
+    public void initPushSwitchState(){
+        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+        boolean state = sp.getBoolean("push_switch", true);
+        Switch push_switch = (Switch)findViewById(R.id.push_switch);
+
+        if(state == true){
+            Log.e("push_switch : ", "true");
+            push_switch.setChecked(true);
+            sp.edit().putBoolean("push_switch", true).commit();
+        }
+        else{
+            Log.e("push_switch : ", "false");
+            push_switch.setChecked(false);
+            sp.edit().putBoolean("push_switch", false).commit();
+        }
+    }
+
+    /**
+     * Prompts the user for permission to use the device location.
+     */
+    private boolean getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+        } else {
+            mLocationPermissionGranted = false;
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+
+        return mLocationPermissionGranted;
+    }
+
+    /**
+     * Handles the result of the request for location permissions.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+
+                    //// 여기서 현재 위치 GPS 가져오기
+                    //getDeviceLocation();
+                }
+                else{
+                    Toast.makeText(this, "위치 권한을 허용하셔야 합니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        }
+        //updateLocationData();
     }
 
     /*@Override
@@ -80,5 +240,59 @@ public class HomeActivity extends Activity {
             //homeKeyReceiver = null;
         }
     }*/
+
+    // 로그아웃
+    private void onClickLogout() {
+        UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
+            @Override
+            public void onCompleteLogout() {
+                GlobalApplication.redirectLoginActivity(HomeActivity.this);
+            }
+        });
+    }
+
+    // 탈퇴
+    private void onClickUnlink() {
+        final String appendMessage = getString(R.string.com_kakao_confirm_unlink);
+        new AlertDialog.Builder(this)
+                .setMessage(appendMessage)
+                .setPositiveButton(getString(R.string.com_kakao_ok_button),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                UserManagement.getInstance().requestUnlink(new UnLinkResponseCallback() {
+                                    @Override
+                                    public void onFailure(ErrorResult errorResult) {
+                                        Logger.e(errorResult.toString());
+                                    }
+
+                                    @Override
+                                    public void onSessionClosed(ErrorResult errorResult) {
+                                        GlobalApplication.redirectLoginActivity(HomeActivity.this);
+                                    }
+
+                                    @Override
+                                    public void onNotSignedUp() {
+                                        //redirectSignupActivity();
+                                        GlobalApplication.redirectLoginActivity(HomeActivity.this);
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Long userId) {
+                                        GlobalApplication.redirectLoginActivity(HomeActivity.this);
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        })
+                .setNegativeButton(getString(R.string.com_kakao_cancel_button),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+
+    }
 
 }
