@@ -2,9 +2,13 @@ package com.example.mocalatte.project1.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.mocalatte.project1.adapter.DBManager;
 import com.example.mocalatte.project1.network.DangerRequestThread;
 
 /**
@@ -71,8 +75,25 @@ public class HomePressActionHandler {
             if(storedid != -1){
                 DangerRequestThread dangerRequestThread = new DangerRequestThread(context, storedid, RealService.mLastKnownLocation.getLatitude(), RealService.mLastKnownLocation.getLongitude());
                 dangerRequestThread.execute();
+
+                DBManager dbManager = new DBManager(context);
+                SQLiteDatabase db = dbManager.getWritableDatabase();
+                Cursor cursor = db.rawQuery("SELECT name, phone FROM " +
+                        dbManager.ContactTB, null);
+                while (cursor.moveToNext()) {
+                    sendSMS(cursor.getString(1), "위급상황 입니다.");
+                }
+                cursor.close();
+                db.close();
             }
             Log.e("홈버튼 연속 클릭완료", "-----");
         }
+    }
+
+    private void sendSMS(String phoneNumber, String message)
+    {
+
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 }

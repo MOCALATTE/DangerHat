@@ -255,6 +255,8 @@ public class HomeActivity extends Activity {
                 if(ContactItemList != null){
                     //ContactItemList.add(new ContactItem(people_Name, people_Number));
                     //friendListAdapter.notifyDataSetChanged();
+                    people_Number = people_Number.replaceAll("-","");
+
                     DBManager dbManager = new DBManager(this);
                     SQLiteDatabase db = dbManager.getWritableDatabase();
                     ContentValues values = new ContentValues();
