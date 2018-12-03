@@ -73,8 +73,12 @@ public class HomePressActionHandler {
             SharedPreferences sp = context.getSharedPreferences("login", context.MODE_PRIVATE);
             long storedid = sp.getLong("id", -1);
             if(storedid != -1){
-                DangerRequestThread dangerRequestThread = new DangerRequestThread(context, storedid, RealService.mLastKnownLocation.getLatitude(), RealService.mLastKnownLocation.getLongitude());
-                dangerRequestThread.execute();
+                try{
+                    DangerRequestThread dangerRequestThread = new DangerRequestThread(context, storedid, RealService.mLastKnownLocation.getLatitude(), RealService.mLastKnownLocation.getLongitude());
+                    dangerRequestThread.execute();
+                } catch (Exception e){
+                    Toast.makeText(context, "lastLocation is null", Toast.LENGTH_SHORT).show();
+                }
 
                 DBManager dbManager = new DBManager(context);
                 SQLiteDatabase db = dbManager.getWritableDatabase();

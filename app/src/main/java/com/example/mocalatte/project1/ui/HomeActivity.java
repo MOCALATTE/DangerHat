@@ -191,9 +191,16 @@ public class HomeActivity extends Activity {
         initFriendList();
 
         //getLocationPermission();
-        getPermission();    //권한
+        boolean perm = getPermission();    //권한
 
+        if(perm == true){
+            registerService();
+        }
+    }
+
+    public void registerService(){
         if (RealService.serviceIntent == null) {
+            Toast.makeText(this, "서비스 실행됨!", Toast.LENGTH_SHORT).show();
             serviceIntent = new Intent(this, RealService.class);
             startService(serviceIntent);
         } else {
@@ -326,7 +333,7 @@ public class HomeActivity extends Activity {
         db.close();
         friendListAdapter.notifyDataSetChanged();
     }
-    private void getPermission() {
+    private boolean getPermission() {
         //checkSelfPermission을 사용하여 사용자가 권한을 승인해야만 api의 사용이 가능
         //또한, Manifest에서 uses-permission으로 선언된 기능에 대해서만 동의진행이 가능하다
         if (Build.VERSION.SDK_INT >=23 && ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED ||
@@ -337,7 +344,9 @@ public class HomeActivity extends Activity {
             //전화, 연락처 접근, 위치수신에 대한 권한 요청, String 배열로 복수개의 요청이 가능함
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS,
                     Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION);
+            return false;
         }
+        return true;
     }
     /**
      * Prompts the user for permission to use the device location.
@@ -382,6 +391,9 @@ public class HomeActivity extends Activity {
 
                     //// 여기서 현재 위치 GPS 가져오기
                     //getDeviceLocation();
+
+                    Toast.makeText(this, "권한 허용됨.", Toast.LENGTH_SHORT).show();
+                    registerService();
                 }
                 else{
                     //권한 거부

@@ -29,12 +29,14 @@
                 android:id="@+id/btn_sms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="문자"/>
+                android:text="문자"
+                android:visibility="gone"/>
             <Button
                 android:id="@+id/btn_sos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="긴급전화"/>
+                android:text="긴급전화"
+                android:visibility="gone"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

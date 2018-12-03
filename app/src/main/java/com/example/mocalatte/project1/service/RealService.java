@@ -19,6 +19,9 @@ import android.widget.Toast;
 
 import com.example.mocalatte.project1.network.UpdateGPSThread;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -41,6 +44,7 @@ public class RealService extends Service {
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private boolean mLocationPermissionGranted;
 
+    LocationCallback locationCallback;
 
     public RealService() {
     }
@@ -101,7 +105,88 @@ public class RealService extends Service {
             //getDeviceLocation();
         }*/
 
+        locationUpdateRepeatedly();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    void locationUpdateRepeatedly(){
+        // 위치 주기적 업데이트 코드.. 1 종료시점에 반드시 remove 해줘야함.. onRestart, onStop에서 처리했음..
+        try{
+            LocationRequest locationRequest = new LocationRequest();
+            locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            locationRequest.setInterval(10000);
+            locationRequest.setFastestInterval(5000);
+            locationCallback = new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    Toast.makeText(getApplicationContext(), "requestLocationUpdates !!!!!", Toast.LENGTH_SHORT).show();
+                    mLastKnownLocation = locationResult.getLastLocation();
+
+                    /*if(moveCameraOption == true){
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(mLastKnownLocation.getLatitude(),
+                                        mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    }*/
+                }
+            };
+            mFusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null/*Looper*/);
+        } catch (SecurityException e){
+            e.printStackTrace();
+        }
+
+        // 위치 주기적 업데이트 코드.. 2 옛날 방식.. 최근에는 FusedLocationProviderClient에서 Location update 기능 지원함..
+        /*locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Toast.makeText(ChatRoomActivity.this, "onLocationChanged !!!!!", Toast.LENGTH_SHORT).show();
+                mLastKnownLocation = location;
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        try {
+            // 실내에서는 GPS_PROVIDER가 응답이 없다는 이슈가 있음. NETWORK_PROVIDER까지 사용하자..
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    10000,
+                    1,
+                    locationListener
+            );
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    10000,
+                    1,
+                    locationListener
+            );
+
+            //GlobalApplication.lastKnownLocation = GlobalApplication.lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        } catch (SecurityException se) {
+            se.printStackTrace();
+        }*/
+    }
+    void locationUpdateStop(){
+        if(mFusedLocationProviderClient != null){
+            try{
+                mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
+            } catch(NullPointerException ne){
+                Log.e("log", "init did not work yet");
+            }
+        }
     }
 
     @Override
@@ -124,6 +209,8 @@ public class RealService extends Service {
             unregisterReceiver(homeKeyReceiver);
             homeKeyReceiver = null;
         }
+
+        locationUpdateStop();
     }
 
     protected void setAlarmTimer() {
