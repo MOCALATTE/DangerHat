@@ -2,11 +2,13 @@ package com.example.mocalatte.project1.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.adapter.DBManager;
 import com.example.mocalatte.project1.adapter.FriendListAdapter;
 import com.example.mocalatte.project1.item.ContactItem;
 import com.example.mocalatte.project1.service.RealService;
@@ -47,6 +50,10 @@ public class HomeActivity extends Activity {
     static final int PICK_CONTACT = 2;
     private String people_Number;
     private String people_Name;
+
+    ArrayList<ContactItem> ContactItemList;
+    FriendListAdapter friendListAdapter;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +127,11 @@ public class HomeActivity extends Activity {
         initPushSwitchState();
 
         //
+        ContactItemList = new ArrayList<>();
+        ListView friendList = (ListView)findViewById(R.id.friendlist);
+        friendListAdapter = new FriendListAdapter(this, ContactItemList);
+        friendList.setAdapter(friendListAdapter);
+        initFriendList();
 
         //getLocationPermission();
         getPermission();    //권한
@@ -174,12 +186,19 @@ public class HomeActivity extends Activity {
                 Log.d("test", "name: "+people_Name);
                 Log.d("test", "number: "+people_Number);
 
-                ArrayList<ContactItem> fff = new ArrayList<>();
-                for(int i=0; i<5; i++)
-                    fff.add(new ContactItem(people_Name, people_Number));
-                ListView friendList = (ListView)findViewById(R.id.friendlist);
-                FriendListAdapter friendListAdapter = new FriendListAdapter(this, fff);
-                friendList.setAdapter(friendListAdapter);
+                //ContactItemList = new ArrayList<>();
+                if(ContactItemList != null){
+                    //ContactItemList.add(new ContactItem(people_Name, people_Number));
+                    //friendListAdapter.notifyDataSetChanged();
+                    DBManager dbManager = new DBManager(this);
+                    SQLiteDatabase db = dbManager.getWritableDatabase();
+                    ContentValues values = new ContentValues();
+                    values.put("name", people_Name);
+                    values.put("phone", people_Number);
+                    db.insert(dbManager.ContactTB, null, values);
+                    db.close();
+                    initFriendList();
+                }
                 //startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+people_Number)));
             }
         }
@@ -220,6 +239,25 @@ public class HomeActivity extends Activity {
             push_switch.setChecked(false);
             sp.edit().putBoolean("push_switch", false).commit();
         }
+    }
+    // Sqlite로부터 SMS보낼 연락처 목록을 세팅함
+    public void initFriendList(){
+        ContactItemList.clear();
+        DBManager dbManager = new DBManager(this);
+        SQLiteDatabase db = dbManager.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT name, phone FROM " +
+                dbManager.ContactTB, null);
+        while (cursor.moveToNext()) {
+            ContactItemList.add(
+                    new ContactItem(
+                            cursor.getString(0) // name
+                            , cursor.getString(1)   // phone
+                    )
+            );
+        }
+        cursor.close();
+        db.close();
+        friendListAdapter.notifyDataSetChanged();
     }
     private void getPermission() {
         //checkSelfPermission을 사용하여 사용자가 권한을 승인해야만 api의 사용이 가능
