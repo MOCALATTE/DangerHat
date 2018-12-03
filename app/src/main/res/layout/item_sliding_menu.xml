@@ -3,11 +3,19 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:id="@+id/friend_name"/>
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:id="@+id/friend_contactnum"/>
+    <ImageButton
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/friendDeleteBtn"
+        android:src="@drawable/ic_minuss"
+        android:background="@null"/>
 </LinearLayout>
