@@ -129,7 +129,7 @@ public class SignUpActivity extends Activity {
 
                             // 서버에 저장 완료했거나 이미 저장된 유저..
                             if( repo.getMsg().equals("success")
-                                    || ( repo.getMsg().equals("fail") && repo.getReason().equals("alreadyExist") )
+                                    || ( repo.getMsg().equals("fail") && repo.getReason().equals("notfoundrecord or data not changed") )
                                     )
                             {
                                 SharedPreferences.Editor editor = sp.edit();
