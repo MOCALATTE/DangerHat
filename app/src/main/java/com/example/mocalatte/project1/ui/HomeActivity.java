@@ -31,7 +31,9 @@ import android.widget.Toast;
 import com.example.mocalatte.project1.R;
 import com.example.mocalatte.project1.adapter.ContactListAdapter;
 import com.example.mocalatte.project1.adapter.DBManager;
+import com.example.mocalatte.project1.adapter.SosListAdapter;
 import com.example.mocalatte.project1.item.ContactItem;
+import com.example.mocalatte.project1.item.SosItem;
 import com.example.mocalatte.project1.service.RealService;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
@@ -51,9 +53,9 @@ public class HomeActivity extends Activity {
     static final int PICK_CONTACT = 2;
     private String people_Number;
     private String people_Name;
-    boolean friendlist = true;
+    boolean contactlist = true;
     ArrayList<ContactItem> ContactItemList;
-    ContactListAdapter friendListAdapter;
+    ContactListAdapter contactListAdapter;
 
 
     @Override
@@ -103,12 +105,10 @@ public class HomeActivity extends Activity {
             }
         });
 
-        /*Button btnSos = (Button) findViewById(R.id.btn_sos);
+        Button btnSos = (Button) findViewById(R.id.btn_sos);
         btnSos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //ArrayList<SosItem> mSosItemList;
-
                 SosListAdapter sosListAdapter;
                 ArrayList<SosItem> mSosItemList = new ArrayList<>();
                 mSosItemList.add(new SosItem("경찰서","112"));
@@ -119,21 +119,20 @@ public class HomeActivity extends Activity {
                 mSosItemList.add(new SosItem("사이버테러신고","118"));
                 mSosItemList.add(new SosItem("국정원","111"));
                 mSosItemList.add(new SosItem("해양재난신고","122"));
-                if (friendlist) {
-                    ((ListView) findViewById(R.id.soslist)).setVisibility(View.VISIBLE);
-                    ((ListView) findViewById(R.id.friendlist)).setVisibility(View.GONE);
-                    ListView sosList = (ListView) findViewById(R.id.soslist);
+                if (contactlist) {
+                    ((ListView) findViewById(R.id.lv_soslist)).setVisibility(View.VISIBLE);
+                    ((ListView) findViewById(R.id.lv_contactlist)).setVisibility(View.GONE);
+                    ListView sosList = (ListView) findViewById(R.id.lv_soslist);
                     sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
                     sosList.setAdapter(sosListAdapter);
-                    friendlist = false;
+                    contactlist = false;
                 } else {
-                    ((ListView) findViewById(R.id.soslist)).setVisibility(View.GONE);
-                    ((ListView) findViewById(R.id.friendlist)).setVisibility(View.VISIBLE);
-                    friendlist = true;
+                    ((ListView) findViewById(R.id.lv_soslist)).setVisibility(View.GONE);
+                    ((ListView) findViewById(R.id.lv_contactlist)).setVisibility(View.VISIBLE);
+                    contactlist = true;
                 }
             }
-        });*/
-
+        });
 
         Button btnTel = (Button) findViewById(R.id.btn_tel);
         btnTel.setOnClickListener(new View.OnClickListener() {
@@ -161,6 +160,7 @@ public class HomeActivity extends Activity {
                 }
             }
         });
+
         initRequestBtnState();
 
         final Switch push_switch = (Switch) findViewById(R.id.push_switch);
@@ -181,14 +181,12 @@ public class HomeActivity extends Activity {
         });
         initPushSwitchState();
 
-        //
         ContactItemList = new ArrayList<>();
         ListView friendList = (ListView)findViewById(R.id.lv_contactlist);
-        friendListAdapter = new ContactListAdapter(this, ContactItemList);
-        friendList.setAdapter(friendListAdapter);
+        contactListAdapter = new ContactListAdapter(this, ContactItemList);
+        friendList.setAdapter(contactListAdapter);
         initFriendList();
 
-        //getLocationPermission();
         boolean perm = getPermission();    //권한
 
         if(perm == true){
@@ -329,8 +327,12 @@ public class HomeActivity extends Activity {
         }
         cursor.close();
         db.close();
-        friendListAdapter.notifyDataSetChanged();
+        contactListAdapter.notifyDataSetChanged();
     }
+
+    /**
+     * Prompts the user for permission
+     */
     private boolean getPermission() {
         //checkSelfPermission을 사용하여 사용자가 권한을 승인해야만 api의 사용이 가능
         //또한, Manifest에서 uses-permission으로 선언된 기능에 대해서만 동의진행이 가능하다
@@ -346,28 +348,6 @@ public class HomeActivity extends Activity {
         }
         return true;
     }
-    /**
-     * Prompts the user for permission to use the device location.
-     */
-    //private boolean getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        /*if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            mLocationPermissionGranted = false;
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-        return mLocationPermissionGranted;
-    }*/
 
     /**
      * Handles the result of the request for location permissions.
@@ -507,5 +487,4 @@ public class HomeActivity extends Activity {
                         }).show();
 
     }
-
 }
