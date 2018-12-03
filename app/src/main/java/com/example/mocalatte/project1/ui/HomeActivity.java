@@ -403,6 +403,12 @@ public class HomeActivity extends Activity {
 
     // 로그아웃
     private void onClickLogout() {
+        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.remove("home_request_ok");
+        editor.remove("push_switch");
+        editor.remove("id");
+        editor.commit();
         UserManagement.getInstance().requestLogout(new LogoutResponseCallback() {
             @Override
             public void onCompleteLogout() {
@@ -428,17 +434,35 @@ public class HomeActivity extends Activity {
 
                                     @Override
                                     public void onSessionClosed(ErrorResult errorResult) {
+                                        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sp.edit();
+                                        editor.remove("home_request_ok");
+                                        editor.remove("push_switch");
+                                        editor.remove("id");
+                                        editor.commit();
                                         GlobalApplication.redirectLoginActivity(HomeActivity.this);
                                     }
 
                                     @Override
                                     public void onNotSignedUp() {
                                         //redirectSignupActivity();
+                                        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sp.edit();
+                                        editor.remove("home_request_ok");
+                                        editor.remove("push_switch");
+                                        editor.remove("id");
+                                        editor.commit();
                                         GlobalApplication.redirectLoginActivity(HomeActivity.this);
                                     }
 
                                     @Override
                                     public void onSuccess(Long userId) {
+                                        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sp.edit();
+                                        editor.remove("home_request_ok");
+                                        editor.remove("push_switch");
+                                        editor.remove("id");
+                                        editor.commit();
                                         GlobalApplication.redirectLoginActivity(HomeActivity.this);
                                     }
                                 });
