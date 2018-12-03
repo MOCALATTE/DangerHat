@@ -120,7 +120,7 @@ public class RealService extends Service {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    Toast.makeText(getApplicationContext(), "requestLocationUpdates !!!!!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "requestLocationUpdates !!!!!", Toast.LENGTH_SHORT).show();
                     mLastKnownLocation = locationResult.getLastLocation();
 
                     /*if(moveCameraOption == true){
