@@ -21,10 +21,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.adapter.FriendListAdapter;
+import com.example.mocalatte.project1.item.ContactItem;
 import com.example.mocalatte.project1.service.RealService;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
@@ -32,7 +35,7 @@ import com.kakao.usermgmt.callback.LogoutResponseCallback;
 import com.kakao.usermgmt.callback.UnLinkResponseCallback;
 import com.kakao.util.helper.log.Logger;
 
-import static com.example.mocalatte.project1.ui.GlobalApplication.context;
+import java.util.ArrayList;
 
 
 public class HomeActivity extends Activity {
@@ -40,9 +43,7 @@ public class HomeActivity extends Activity {
     //HomeKeyReceiver homeKeyReceiver;
     private Intent serviceIntent;
 
-    //private boolean mLocationPermissionGranted;
     final int PERMISSION = 1;
-    //private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     static final int PICK_CONTACT = 2;
     private String people_Number;
     private String people_Name;
@@ -172,7 +173,14 @@ public class HomeActivity extends Activity {
                 }
                 Log.d("test", "name: "+people_Name);
                 Log.d("test", "number: "+people_Number);
-                startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+people_Number)));
+
+                ArrayList<ContactItem> fff = new ArrayList<>();
+                for(int i=0; i<5; i++)
+                    fff.add(new ContactItem(people_Name, people_Number));
+                ListView friendList = (ListView)findViewById(R.id.friendlist);
+                FriendListAdapter friendListAdapter = new FriendListAdapter(this, fff);
+                friendList.setAdapter(friendListAdapter);
+                //startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+people_Number)));
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

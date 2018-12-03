@@ -41,10 +41,10 @@ public class FriendListAdapter extends BaseAdapter {
             convertView = View.inflate(context, R.layout.item_sliding_menu, null);
         }
         TextView name = (TextView)convertView.findViewById(R.id.friend_name);
-        TextView contact = (TextView)convertView.findViewById(R.id.friend_contactnum);
+        TextView num = (TextView)convertView.findViewById(R.id.friend_contactnum);
         ContactItem item = lstItem.get(position);
         name.setText(item.getContactName());
-        contact.setText(item.getContactNum());
+        num.setText(item.getContactNum());
 
         return convertView;
     }
