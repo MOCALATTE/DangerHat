@@ -53,7 +53,7 @@ public class HomeActivity extends Activity {
     static final int PICK_CONTACT = 2;
     private String people_Number;
     private String people_Name;
-
+    boolean friendlist = true;
     ArrayList<ContactItem> ContactItemList;
     FriendListAdapter friendListAdapter;
 
@@ -110,17 +110,29 @@ public class HomeActivity extends Activity {
             @Override
             public void onClick(View view) {
                 //ArrayList<SosItem> mSosItemList;
+
                 SosListAdapter sosListAdapter;
                 ArrayList<SosItem> mSosItemList = new ArrayList<>();
                 mSosItemList.add(new SosItem("경찰서","112"));
-                mSosItemList.add(new SosItem("간첩신고","112"));
-                mSosItemList.add(new SosItem("소방서","112"));
-                mSosItemList.add(new SosItem("밀수신고","112"));
-                mSosItemList.add(new SosItem("학교폭력 신고 및 상담","112"));
-                mSosItemList.add(new SosItem("사이버테러신고","112"));
-                //ListView sosList = (ListView)findViewById(R.id.friendlist);
-                sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
-                //sosList.setAdapter(sosListAdapter);
+                mSosItemList.add(new SosItem("간첩신고","113"));
+                mSosItemList.add(new SosItem("소방서","119"));
+                mSosItemList.add(new SosItem("밀수신고","125"));
+                mSosItemList.add(new SosItem("학교폭력 신고 및 상담","117"));
+                mSosItemList.add(new SosItem("사이버테러신고","118"));
+                mSosItemList.add(new SosItem("국정원","111"));
+                mSosItemList.add(new SosItem("해양재난신고","122"));
+                if (friendlist) {
+                    ((ListView) findViewById(R.id.soslist)).setVisibility(View.VISIBLE);
+                    ((ListView) findViewById(R.id.friendlist)).setVisibility(View.GONE);
+                    ListView sosList = (ListView) findViewById(R.id.soslist);
+                    sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
+                    sosList.setAdapter(sosListAdapter);
+                    friendlist = false;
+                } else {
+                    ((ListView) findViewById(R.id.soslist)).setVisibility(View.GONE);
+                    ((ListView) findViewById(R.id.friendlist)).setVisibility(View.VISIBLE);
+                    friendlist = true;
+                }
             }
         });
 
