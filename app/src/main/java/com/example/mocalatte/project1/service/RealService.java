@@ -79,8 +79,9 @@ public class RealService extends Service {
                                 }
                             }
                         });
-                        SystemClock.sleep(1 * 30 * 1000);  // 테스트용도.. 30초마다..
+                        SystemClock.sleep(1 * 60 * 1000);  // 테스트용도.. 60초마다..
                         //SystemClock.sleep(4 * 60 * 1000); //4분마다 실행..
+                        //SystemClock.sleep(120 * 60 * 1000); //2시간마다 실행..
                     }
                 }
             });

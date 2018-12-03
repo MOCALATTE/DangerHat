@@ -5,7 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +25,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.adapter.DBManager;
 import com.example.mocalatte.project1.adapter.FriendListAdapter;
 import com.example.mocalatte.project1.item.FriendListMenu;
 import com.example.mocalatte.project1.service.RealService;
@@ -40,6 +45,13 @@ public class HomeActivity extends Activity {
 
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+
+    ArrayList<FriendListMenu> friendListMenus;
+    FriendListAdapter friendListAdapter;
+
+    static final int PICK_CONTACT = 2;
+    private String people_Number;
+    private String people_Name;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,8 +84,18 @@ public class HomeActivity extends Activity {
             fff.add(new FriendListMenu("홍길동", i+""));
 
         ListView friendList = (ListView)findViewById(R.id.friendlist);
-        FriendListAdapter friendListAdapter = new FriendListAdapter(this, fff);
         friendList.setAdapter(friendListAdapter);
+
+        //
+        Button btnTel = (Button) findViewById(R.id.btn_tel);
+        btnTel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent contact_picker = new Intent(Intent.ACTION_PICK);
+                contact_picker.setType(ContactsContract.Contacts.CONTENT_TYPE);
+                startActivityForResult(contact_picker, PICK_CONTACT);
+            }
+        });
 
         ImageButton requestbtn = (ImageButton)findViewById(R.id.requestbutton);
         requestbtn.setOnClickListener(new View.OnClickListener() {
@@ -135,6 +157,43 @@ public class HomeActivity extends Activity {
         }
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == PICK_CONTACT && resultCode == RESULT_OK){
+            Log.d("INNOVER", "request OK_PICKCONTACT");
+
+            Uri dataUri = data.getData();
+            Cursor cursor = managedQuery(dataUri, null, null, null, null);
+
+            while (cursor.moveToNext()) {
+                int getcolumnId = cursor.getColumnIndex(ContactsContract.Contacts._ID);
+
+                String id = cursor.getString(getcolumnId);
+                people_Name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME));
+                String hasPhoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+
+                if(hasPhoneNumber.equalsIgnoreCase("1")) {
+                    hasPhoneNumber = "true";
+                }else {
+                    hasPhoneNumber = "false";
+                }
+
+                if(Boolean.parseBoolean(hasPhoneNumber)) {
+                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID+" = "+id, null, null);
+                    while(phones.moveToNext()) {
+                        people_Number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                    }
+                    phones.close();	//	End
+                }
+                Log.d("test", "name: "+people_Name);
+                Log.d("test", "number: "+people_Number);
+                startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+people_Number)));
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     // 홈버튼 연속 클릭으로 자신의 위험을 알릴 것인지 아닌지를 결정하는 버튼 설정..
     // 현재 SharedPreferences에 저장된 값에 따라 on/off 상태를 표시함.
     public void initRequestBtnState(){
@@ -171,6 +230,29 @@ public class HomeActivity extends Activity {
         }
     }
 
+    // Sqlite로부터 SMS보낼 연락처 목록을 세팅함
+    public void initFriendList(){
+        friendListMenus.clear();
+
+        DBManager dbManager = new DBManager(this);
+        SQLiteDatabase db = dbManager.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT name, phone FROM " +
+                dbManager.ContactTB, null);
+
+
+        while (cursor.moveToNext()) {
+            friendListMenus.add(
+                    new FriendListMenu(
+                            cursor.getString(0) // name
+                            , cursor.getString(1)   // phone
+                    )
+            );
+        }
+        cursor.close();
+        db.close();
+        friendListAdapter.notifyDataSetChanged();
+
+    }
     /**
      * Prompts the user for permission to use the device location.
      */
