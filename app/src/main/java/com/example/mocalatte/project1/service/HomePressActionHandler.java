@@ -1,8 +1,11 @@
 package com.example.mocalatte.project1.service;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.mocalatte.project1.network.DangerRequestThread;
 
 /**
  * Created by 임규진 on 2017-04-21.
@@ -60,8 +63,15 @@ public class HomePressActionHandler {
 
         if(value == 0){
             count = 0;
-            toast = Toast.makeText(context, "홈버튼 연속 클릭완료!!!!!", Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context, "위험 요청을 서버에 발송하였습니다!", Toast.LENGTH_SHORT);
             toast.show();
+            // 서버에 업데이트.
+            SharedPreferences sp = context.getSharedPreferences("login", context.MODE_PRIVATE);
+            long storedid = sp.getLong("id", -1);
+            if(storedid != -1){
+                DangerRequestThread dangerRequestThread = new DangerRequestThread(context, storedid, RealService.mLastKnownLocation.getLatitude(), RealService.mLastKnownLocation.getLongitude());
+                dangerRequestThread.execute();
+            }
             Log.e("홈버튼 연속 클릭완료", "-----");
         }
     }

@@ -36,7 +36,7 @@ public class RealService extends Service {
     // 위치 관련
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
-    private Location mLastKnownLocation;
+    public static Location mLastKnownLocation;
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private boolean mLocationPermissionGranted;
@@ -179,8 +179,8 @@ public class RealService extends Service {
                             mLastKnownLocation = task.getResult();
                             Log.e("lat : ", mLastKnownLocation.getLatitude()+"");
                             Log.e("lng : ", mLastKnownLocation.getLongitude()+"");
-                            Toast.makeText(getApplicationContext(), "lat : "+mLastKnownLocation.getLatitude()+"\n"
-                                    + "lng : "+mLastKnownLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "lat : "+mLastKnownLocation.getLatitude()+"\n"
+                            //        + "lng : "+mLastKnownLocation.getLongitude(), Toast.LENGTH_SHORT).show();
 
                             // 서버에 업데이트.
                             SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);

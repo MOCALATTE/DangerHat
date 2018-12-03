@@ -141,7 +141,8 @@ public class HomeActivity extends Activity {
             startService(serviceIntent);
         } else {
             serviceIntent = RealService.serviceIntent;//getInstance().getApplication();
-            Toast.makeText(getApplicationContext(), "already RealService done", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "already RealService done", Toast.LENGTH_LONG).show();
+            Log.e("Home - onCreate : ", "already RealService done");
         }
     }
 

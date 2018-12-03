@@ -1,6 +1,7 @@
 package com.example.mocalatte.project1.ui;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -34,6 +35,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MapsActivity extends AppCompatActivity
         implements OnMapReadyCallback {
@@ -71,6 +75,32 @@ public class MapsActivity extends AppCompatActivity
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
 
+    String GPS;
+
+    public void addDangerGPSMarker(String GPS){
+        try {
+            JSONObject jsonObject = new JSONObject(GPS);
+
+            LatLng latLng = new LatLng(
+                    Double.parseDouble(jsonObject.getString("lat"))
+                    , Double.parseDouble(jsonObject.getString("lng"))
+            );
+
+            // Add a marker for the selected place, with an info window
+            // showing information about that place.
+            mMap.addMarker(new MarkerOptions()
+                    .title("위험 요청 발생 위치!")
+                    .position(latLng)
+                    .snippet("도와줭.."));
+
+            // Position the map's camera at the location of the marker.
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,
+                    DEFAULT_ZOOM));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +110,15 @@ public class MapsActivity extends AppCompatActivity
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
+
+        Intent intent = getIntent();
+        GPS = intent.getStringExtra("gps");
+        /*if(GPS != null){
+            addDangerGPSMarker(GPS);
+        }
+        else{
+            Log.e("MapsAcitivity - GPS ", "is null!!!!!");
+        }*/
 
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
@@ -382,6 +421,14 @@ public class MapsActivity extends AppCompatActivity
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+                // 위험 요청 상대 위치표시!!!
+                if(GPS != null){
+                    addDangerGPSMarker(GPS);
+                }
+                else{
+                    Log.e("MapsAcitivity - GPS ", "is null!!!!!");
+                }
             } else {
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);

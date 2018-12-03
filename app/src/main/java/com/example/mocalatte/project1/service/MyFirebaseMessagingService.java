@@ -1,11 +1,17 @@
 package com.example.mocalatte.project1.service;
 
-import android.app.Service;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.IBinder;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.ui.MapsActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -14,7 +20,19 @@ public class MyFirebaseMessagingService  extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.e("push arrived","-----");
-        sendNotification(remoteMessage.getData().get("data"));
+
+        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+        long storedid = sp.getLong("id", -1);
+        boolean push_switch = sp.getBoolean("push_switch", true);
+        if(storedid == -1 || push_switch==false){
+            Log.e("수신안함.. ","표시안함");
+        }
+        else{
+            //Log.e("getData : ", remoteMessage.getData());
+            //Log.e("getTo : ", remoteMessage.getTo().toString());
+            Log.e("getData :", remoteMessage.getData().get("message"));
+            sendNotification(remoteMessage.getData().get("message")/*.get("data")*/);
+        }
     }
 
     @Override
@@ -37,6 +55,29 @@ public class MyFirebaseMessagingService  extends FirebaseMessagingService {
     private void sendNotification(String messageBody) {
 
         Log.e("sendNotification", "Working!!");
+        Log.e("messageBody", messageBody);
+        // 수신되면 인텐트에 지정한 액티비티가 실행되므로 Main말고 다른 액티비티 만들어서 처리하도록 하거나 로그인 했는지 검사로직 필요!!!!!!!!!!
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("gps", messageBody);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT);// Second param is Request code
+
+        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("위험 요청 수신!!")
+                .setContentText("클릭해서 위치를 확인하세요!!!!!")
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0, notificationBuilder.build()); // First param is ID of notification
+
         /*try {
             SimpleDateFormat dateFormat = new SimpleDateFormat(
                     "yyyy-MM-dd HH:mm", Locale.getDefault());

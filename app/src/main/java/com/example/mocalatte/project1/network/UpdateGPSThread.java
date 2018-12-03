@@ -3,7 +3,6 @@ package com.example.mocalatte.project1.network;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.mocalatte.project1.ui.GlobalApplication;
 import com.google.gson.annotations.SerializedName;
@@ -107,15 +106,18 @@ public class UpdateGPSThread extends AsyncTask<Void, Void, UpdateGPSThread.Repo>
         if(rpo!= null){
 
             if(rpo.getMsg().equals("success")){
-                Toast.makeText(context, "Success to join service.", Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, "Success to join service.", Toast.LENGTH_LONG).show();
                 /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
+                Log.e("UpdateGPSThread : ","Success to join service.");
             }
             else if(rpo.getMsg().equals("fail")){
-                Toast.makeText(context, "Already joined user", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "Already joined user", Toast.LENGTH_SHORT).show();
+                Log.e("UpdateGPSThread : ","Fail to join service.");
             }
             else{
-                Toast.makeText(context, "Fail to join service..", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "Fail to join service..", Toast.LENGTH_SHORT).show();
+                Log.e("UpdateGPSThread : ","Fail to join service.");
             }
         }
     }

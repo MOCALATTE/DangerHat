@@ -106,7 +106,6 @@ public class DangerRequestThread extends AsyncTask<Void, Void, DangerRequestThre
         if(rpo!= null){
             Log.e("success : ", rpo.getSuccess()+"");
             Log.e("failure : ", rpo.getFailure()+"");
-
         }
     }
 
