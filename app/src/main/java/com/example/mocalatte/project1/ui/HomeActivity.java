@@ -119,15 +119,15 @@ public class HomeActivity extends Activity {
                 mSosItemList.add(new SosItem("국정원","111"));
                 mSosItemList.add(new SosItem("해양재난신고","122"));
                 if (friend_list) {
-                    ((ListView) findViewById(R.id.soslist)).setVisibility(View.VISIBLE);
-                    ((ListView) findViewById(R.id.friendlist)).setVisibility(View.GONE);
-                    ListView sosList = (ListView) findViewById(R.id.soslist);
+                    ((ListView) findViewById(R.id.lv_soslist)).setVisibility(View.VISIBLE);
+                    ((ListView) findViewById(R.id.lv_contactlist)).setVisibility(View.GONE);
+                    ListView sosList = (ListView) findViewById(R.id.lv_soslist);
                     sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
                     sosList.setAdapter(sosListAdapter);
                     friend_list = false;
                 } else {
-                    ((ListView) findViewById(R.id.soslist)).setVisibility(View.GONE);
-                    ((ListView) findViewById(R.id.friendlist)).setVisibility(View.VISIBLE);
+                    ((ListView) findViewById(R.id.lv_soslist)).setVisibility(View.GONE);
+                    ((ListView) findViewById(R.id.lv_contactlist)).setVisibility(View.VISIBLE);
                     friend_list = true;
                 }
             }
