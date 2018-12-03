@@ -219,8 +219,6 @@ public class MapsActivity extends AppCompatActivity
         getDeviceLocation();
     }
 
-
-
     /**
      * Gets the current location of the device, and positions the map's camera.
      */

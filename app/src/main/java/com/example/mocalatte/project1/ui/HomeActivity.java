@@ -29,8 +29,8 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.adapter.ContactListAdapter;
 import com.example.mocalatte.project1.adapter.DBManager;
-import com.example.mocalatte.project1.adapter.FriendListAdapter;
 import com.example.mocalatte.project1.adapter.SosListAdapter;
 import com.example.mocalatte.project1.item.ContactItem;
 import com.example.mocalatte.project1.item.SosItem;
@@ -53,10 +53,9 @@ public class HomeActivity extends Activity {
     static final int PICK_CONTACT = 2;
     private String people_Number;
     private String people_Name;
-    boolean friendlist = true;
+    boolean friend_list = true;
     ArrayList<ContactItem> ContactItemList;
-    FriendListAdapter friendListAdapter;
-
+    ContactListAdapter contactListAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,8 +108,6 @@ public class HomeActivity extends Activity {
         btnSos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //ArrayList<SosItem> mSosItemList;
-
                 SosListAdapter sosListAdapter;
                 ArrayList<SosItem> mSosItemList = new ArrayList<>();
                 mSosItemList.add(new SosItem("경찰서","112"));
@@ -121,21 +118,20 @@ public class HomeActivity extends Activity {
                 mSosItemList.add(new SosItem("사이버테러신고","118"));
                 mSosItemList.add(new SosItem("국정원","111"));
                 mSosItemList.add(new SosItem("해양재난신고","122"));
-                if (friendlist) {
+                if (friend_list) {
                     ((ListView) findViewById(R.id.soslist)).setVisibility(View.VISIBLE);
                     ((ListView) findViewById(R.id.friendlist)).setVisibility(View.GONE);
                     ListView sosList = (ListView) findViewById(R.id.soslist);
                     sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
                     sosList.setAdapter(sosListAdapter);
-                    friendlist = false;
+                    friend_list = false;
                 } else {
                     ((ListView) findViewById(R.id.soslist)).setVisibility(View.GONE);
                     ((ListView) findViewById(R.id.friendlist)).setVisibility(View.VISIBLE);
-                    friendlist = true;
+                    friend_list = true;
                 }
             }
         });
-
 
         Button btnTel = (Button) findViewById(R.id.btn_tel);
         btnTel.setOnClickListener(new View.OnClickListener() {
@@ -181,16 +177,17 @@ public class HomeActivity extends Activity {
                 }
             }
         });
+
         initPushSwitchState();
 
         //
         ContactItemList = new ArrayList<>();
-        ListView friendList = (ListView)findViewById(R.id.friendlist);
-        friendListAdapter = new FriendListAdapter(this, ContactItemList);
-        friendList.setAdapter(friendListAdapter);
+        ListView contactList = (ListView)findViewById(R.id.lv_contactlist);
+        contactListAdapter = new ContactListAdapter(this, ContactItemList);
+        contactList.setAdapter(contactListAdapter);
+
         initFriendList();
 
-        //getLocationPermission();
         getPermission();    //권한
 
         if (RealService.serviceIntent == null) {
@@ -203,9 +200,9 @@ public class HomeActivity extends Activity {
         }
     }
 
+    //메시지 전송
     private void sendSMS(String phoneNumber, String message)
     {
-
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
@@ -290,6 +287,7 @@ public class HomeActivity extends Activity {
             sp.edit().putBoolean("home_request_ok", false).commit();
         }
     }
+
     // 위험 요청 수신여부 Switch 설정..
     public void initPushSwitchState(){
         SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
@@ -307,6 +305,7 @@ public class HomeActivity extends Activity {
             sp.edit().putBoolean("push_switch", false).commit();
         }
     }
+
     // Sqlite로부터 SMS보낼 연락처 목록을 세팅함
     public void initFriendList(){
         ContactItemList.clear();
@@ -324,8 +323,12 @@ public class HomeActivity extends Activity {
         }
         cursor.close();
         db.close();
-        friendListAdapter.notifyDataSetChanged();
+        contactListAdapter.notifyDataSetChanged();
     }
+
+    /**
+     * Prompts the user for permission
+     */
     private void getPermission() {
         //checkSelfPermission을 사용하여 사용자가 권한을 승인해야만 api의 사용이 가능
         //또한, Manifest에서 uses-permission으로 선언된 기능에 대해서만 동의진행이 가능하다
@@ -339,44 +342,18 @@ public class HomeActivity extends Activity {
                     Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION);
         }
     }
-    /**
-     * Prompts the user for permission to use the device location.
-     */
-    //private boolean getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        /*if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            mLocationPermissionGranted = false;
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-        return mLocationPermissionGranted;
-    }*/
 
     /**
      * Handles the result of the request for location permissions.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        //mLocationPermissionGranted = false;
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSION:
                 // If request is cancelled, the result arrays are empty.
                 //grantresult는 requestPermissions에서 요청된 String[]순서로 들어옴. 0~N개로 결과를 탐색
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //mLocationPermissionGranted = true;
                     //권한 허가
                     //해당 권한을 사용해서 작업을 진행할 수 있음
 
@@ -393,7 +370,6 @@ public class HomeActivity extends Activity {
         }
     }
         //updateLocationData();
-
 
     /*@Override
     protected void onResume() {
@@ -492,5 +468,4 @@ public class HomeActivity extends Activity {
                         }).show();
 
     }
-
 }

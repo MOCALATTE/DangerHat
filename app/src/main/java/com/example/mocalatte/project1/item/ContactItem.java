@@ -1,10 +1,5 @@
 package com.example.mocalatte.project1.item;
 
-import android.content.Context;
-import android.provider.ContactsContract;
-
-import java.io.Serializable;
-
 public class ContactItem {
         String contactName;
         String contactNum;

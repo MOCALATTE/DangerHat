@@ -15,11 +15,11 @@ import com.example.mocalatte.project1.item.ContactItem;
 
 import java.util.List;
 
-public class FriendListAdapter extends BaseAdapter {
+public class ContactListAdapter  extends BaseAdapter {
     private Context context;
     private List<ContactItem> lstItem;
 
-    public FriendListAdapter(Context context, List<ContactItem> lstItem) {
+    public ContactListAdapter(Context context, List<ContactItem> lstItem) {
         this.context = context;
         this.lstItem = lstItem;
     }
@@ -42,15 +42,15 @@ public class FriendListAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         if(convertView == null){
-            convertView = View.inflate(context, R.layout.item_sliding_menu, null);
+            convertView = View.inflate(context, R.layout.contact_view, null);
         }
-        TextView name = (TextView)convertView.findViewById(R.id.friend_name);
-        TextView num = (TextView)convertView.findViewById(R.id.friend_contactnum);
+        TextView name = (TextView)convertView.findViewById(R.id.tv_contact_name);
+        TextView num = (TextView)convertView.findViewById(R.id.tv_contact_num);
         ContactItem item = lstItem.get(position);
         name.setText(item.getContactName());
         num.setText(item.getContactNum());
 
-        ImageButton friendDeleteBtn = (ImageButton)convertView.findViewById(R.id.friendDeleteBtn);
+        ImageButton friendDeleteBtn = (ImageButton)convertView.findViewById(R.id.btn_contact_del);
         friendDeleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,7 +79,6 @@ public class FriendListAdapter extends BaseAdapter {
                                 }).show();
             }
         });
-
         return convertView;
     }
 }
