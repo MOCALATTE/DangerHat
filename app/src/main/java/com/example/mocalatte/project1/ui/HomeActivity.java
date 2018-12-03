@@ -20,7 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -79,14 +78,14 @@ public class HomeActivity extends Activity {
             }
         });
 
-        ArrayList<FriendListMenu> fff = new ArrayList<>();
+        /*ArrayList<FriendListMenu> fff = new ArrayList<>();
         for(int i=0; i<5; i++)
             fff.add(new FriendListMenu("홍길동", i+""));
 
         ListView friendList = (ListView)findViewById(R.id.friendlist);
-        friendList.setAdapter(friendListAdapter);
+        FriendListAdapter friendListAdapter = new FriendListAdapter(this, fff);
+        friendList.setAdapter(friendListAdapter);*/
 
-        //
         Button btnTel = (Button) findViewById(R.id.btn_tel);
         btnTel.setOnClickListener(new View.OnClickListener() {
             @Override
