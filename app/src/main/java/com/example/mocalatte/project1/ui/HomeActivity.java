@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
@@ -110,7 +111,7 @@ public class HomeActivity extends Activity {
             @Override
             public void onClick(View view) {
                 SosListAdapter sosListAdapter;
-                ArrayList<SosItem> mSosItemList = new ArrayList<>();
+                final ArrayList<SosItem> mSosItemList = new ArrayList<>();
                 mSosItemList.add(new SosItem("경찰서","112"));
                 mSosItemList.add(new SosItem("간첩신고","113"));
                 mSosItemList.add(new SosItem("소방서","119"));
@@ -125,6 +126,12 @@ public class HomeActivity extends Activity {
                     ListView sosList = (ListView) findViewById(R.id.lv_soslist);
                     sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
                     sosList.setAdapter(sosListAdapter);
+                    sosList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                            startActivity(new Intent("android.intent.action.DIAL", Uri.parse("tel:"+mSosItemList.get(i).getSosNum())));
+                        }
+                    });
                     contactlist = false;
                 } else {
                     ((ListView) findViewById(R.id.lv_soslist)).setVisibility(View.GONE);
@@ -182,9 +189,16 @@ public class HomeActivity extends Activity {
         initPushSwitchState();
 
         ContactItemList = new ArrayList<>();
-        ListView friendList = (ListView)findViewById(R.id.lv_contactlist);
+        final ListView contactlist = (ListView)findViewById(R.id.lv_contactlist);
         contactListAdapter = new ContactListAdapter(this, ContactItemList);
-        friendList.setAdapter(contactListAdapter);
+        contactlist.setAdapter(contactListAdapter);
+        contactlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+ContactItemList.get(i).getContactNum())));
+            }
+        });
+
         initFriendList();
 
         boolean perm = getPermission();    //권한
@@ -271,7 +285,9 @@ public class HomeActivity extends Activity {
                 }
                 //startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+people_Number)));
             }
+
         }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
