@@ -1,5 +1,6 @@
 package com.example.mocalatte.project1.ui;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -39,11 +41,16 @@ public class HomeActivity extends Activity {
     private Intent serviceIntent;
 
     private boolean mLocationPermissionGranted;
-
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean mContactsPermissionGranted;
+    private boolean mCallPermissionGranted;
+    //private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    //private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    //private static final int PERMISSIONS_REQUEST_CALL_PHONE = 1;
+    final int PERMISSION = 1;
     static final int PICK_CONTACT = 2;
     private String people_Number;
     private String people_Name;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +125,10 @@ public class HomeActivity extends Activity {
 
         //
 
-        getLocationPermission();
-
+        //getLocationPermission();
+        //getContactsPermission();
+        //getCallPermission();
+        getPermission();
         if (RealService.serviceIntent == null) {
             serviceIntent = new Intent(this, RealService.class);
             startService(serviceIntent);
@@ -211,16 +220,28 @@ public class HomeActivity extends Activity {
         }
     }
 
+    private void getPermission() {
+        //checkSelfPermission을 사용하여 사용자가 권한을 승인해야만 api의 사용이 가능
+        //또한, Manifest에서 uses-permission으로 선언된 기능에 대해서만 동의진행이 가능하다
+        if (Build.VERSION.SDK_INT >=23 && ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //전화, 연락처 접근, 위치수신에 대한 권한 요청, String 배열로 복수개의 요청이 가능함
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS,
+                    Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION);
+        }
+    }
+
     /**
      * Prompts the user for permission to use the device location.
      */
-    private boolean getLocationPermission() {
+    /*private boolean getLocationPermission() {
         /*
          * Request location permission, so that we can get the location of the
          * device. The result of the permission request is handled by a callback,
          * onRequestPermissionsResult.
          */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+        /*if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
@@ -232,34 +253,88 @@ public class HomeActivity extends Activity {
         }
 
         return mLocationPermissionGranted;
-    }
+    }*/
 
     /**
-     * Handles the result of the request for location permissions.
+     * Prompts the user for permission to use the read contacts.
+     */
+    /*private boolean getContactsPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        /*if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+            mContactsPermissionGranted = true;
+        } else {
+            mContactsPermissionGranted = false;
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.READ_CONTACTS},
+                    PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
+
+        return mContactsPermissionGranted;
+    }*/
+
+    /**
+     * Prompts the user for permission to use the call phone.
+     */
+    /*private boolean getCallPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        /*if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.CALL_PHONE)
+                == PackageManager.PERMISSION_GRANTED) {
+            mCallPermissionGranted = true;
+        } else {
+            mCallPermissionGranted = false;
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.CALL_PHONE},
+                    PERMISSIONS_REQUEST_CALL_PHONE);
+        }
+
+        return mCallPermissionGranted;
+    }*/
+
+    /**
+     * Handles the result of the request for permissions.
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
+        //mLocationPermissionGranted = false;
+        //mContactsPermissionGranted = false;
+        //mCallPermissionGranted = false;
+
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+            case PERMISSION:
                 // If request is cancelled, the result arrays are empty.
+                //grantresult는 requestPermissions에서 요청된 String[]순서로 들어옴. 0~N개로 결과를 탐색
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
+                    //mLocationPermissionGranted = true;
+                    //권한 허가
+                    //해당 권한을 사용해서 작업을 진행할 수 있음
 
                     //// 여기서 현재 위치 GPS 가져오기
                     //getDeviceLocation();
                 }
-                else{
-                    Toast.makeText(this, "위치 권한을 허용하셔야 합니다.", Toast.LENGTH_SHORT).show();
-                    finish();
+                else {
+                    //권한 거부
+                    //사용자가 해당권한을 거부했을때 할 동작 수행
+                    Toast.makeText(this, "권한을 허용하셔야 합니다.", Toast.LENGTH_SHORT).show();
                 }
-            }
+                return;
         }
-        //updateLocationData();
     }
+        //updateLocationData();
+
 
     /*@Override
     protected void onResume() {
