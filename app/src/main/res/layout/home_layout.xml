@@ -25,6 +25,16 @@
                 android:id="@+id/push_switch"
                 android:gravity="center"
                 android:checked="true"/>
+            <Button
+                android:id="@+id/btn_sms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="문자"/>
+            <Button
+                android:id="@+id/btn_sos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="긴급전화"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

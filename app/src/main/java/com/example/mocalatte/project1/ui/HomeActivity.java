@@ -18,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -30,7 +31,9 @@ import android.widget.Toast;
 import com.example.mocalatte.project1.R;
 import com.example.mocalatte.project1.adapter.DBManager;
 import com.example.mocalatte.project1.adapter.FriendListAdapter;
+import com.example.mocalatte.project1.adapter.SosListAdapter;
 import com.example.mocalatte.project1.item.ContactItem;
+import com.example.mocalatte.project1.item.SosItem;
 import com.example.mocalatte.project1.service.RealService;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
@@ -53,6 +56,7 @@ public class HomeActivity extends Activity {
 
     ArrayList<ContactItem> ContactItemList;
     FriendListAdapter friendListAdapter;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,6 +83,47 @@ public class HomeActivity extends Activity {
                 onClickUnlink();
             }
         });
+
+        Button btnSms = (Button) findViewById(R.id.btn_sms);
+        btnSms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContactItemList != null) {
+                    String[] phoneNum = new String[ContactItemList.size()];
+                    String message = "위급 상황입니다.";
+                    for (int i = 0; i < ContactItemList.size(); i++) {
+                        phoneNum[i] = ContactItemList.get(i).getContactNum().toString();
+                        if (phoneNum[i].length() > 0 && message.length() > 0) {
+                            sendSMS(phoneNum[i], message);
+
+                        } else
+                            Toast.makeText(getApplicationContext(), "전화번호와 메시지를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(), "연락처를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        Button btnSos = (Button) findViewById(R.id.btn_sos);
+        btnSos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //ArrayList<SosItem> mSosItemList;
+                SosListAdapter sosListAdapter;
+                ArrayList<SosItem> mSosItemList = new ArrayList<>();
+                mSosItemList.add(new SosItem("경찰서","112"));
+                mSosItemList.add(new SosItem("간첩신고","112"));
+                mSosItemList.add(new SosItem("소방서","112"));
+                mSosItemList.add(new SosItem("밀수신고","112"));
+                mSosItemList.add(new SosItem("학교폭력 신고 및 상담","112"));
+                mSosItemList.add(new SosItem("사이버테러신고","112"));
+                //ListView sosList = (ListView)findViewById(R.id.friendlist);
+                sosListAdapter = new SosListAdapter(getApplicationContext(), mSosItemList);
+                //sosList.setAdapter(sosListAdapter);
+            }
+        });
+
 
         Button btnTel = (Button) findViewById(R.id.btn_tel);
         btnTel.setOnClickListener(new View.OnClickListener() {
@@ -144,6 +189,13 @@ public class HomeActivity extends Activity {
             //Toast.makeText(getApplicationContext(), "already RealService done", Toast.LENGTH_LONG).show();
             Log.e("Home - onCreate : ", "already RealService done");
         }
+    }
+
+    private void sendSMS(String phoneNumber, String message)
+    {
+
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 
     @Override
@@ -265,10 +317,12 @@ public class HomeActivity extends Activity {
         //또한, Manifest에서 uses-permission으로 선언된 기능에 대해서만 동의진행이 가능하다
         if (Build.VERSION.SDK_INT >=23 && ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //전화, 연락처 접근, 위치수신에 대한 권한 요청, String 배열로 복수개의 요청이 가능함
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS,
-                    Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION);
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS,
+                    Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION);
         }
     }
     /**
