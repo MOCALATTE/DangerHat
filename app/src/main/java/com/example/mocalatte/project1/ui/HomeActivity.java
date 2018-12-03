@@ -381,8 +381,13 @@ public class HomeActivity extends Activity {
             case PERMISSION:
                 // If request is cancelled, the result arrays are empty.
                 //grantresult는 requestPermissions에서 요청된 String[]순서로 들어옴. 0~N개로 결과를 탐색
+                Log.e("grantResultslength:",grantResults.length+"");
                 if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[2] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[3] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[4] == PackageManager.PERMISSION_GRANTED) {
                     //mLocationPermissionGranted = true;
                     //권한 허가
                     //해당 권한을 사용해서 작업을 진행할 수 있음
@@ -397,7 +402,7 @@ public class HomeActivity extends Activity {
                     //권한 거부
                     //사용자가 해당권한을 거부했을때 할 동작 수행
                     Toast.makeText(this, "권한을 허용하셔야 합니다.", Toast.LENGTH_SHORT).show();
-                    //finish();
+                    finish();
                 }
                 return;
         }
