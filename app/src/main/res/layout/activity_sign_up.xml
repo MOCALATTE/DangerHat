@@ -22,5 +22,4 @@
         android:paddingLeft="@dimen/com_kakao_padding"
         android:paddingRight="@dimen/com_kakao_padding"
         android:text="usermgmg_signup_button"/>
-
 </LinearLayout>

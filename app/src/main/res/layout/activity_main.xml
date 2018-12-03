@@ -43,8 +43,5 @@
                 android:layout_centerInParent="true"/>
 
         </RelativeLayout>
-
-
     </LinearLayout>
-
 </android.support.constraint.ConstraintLayout>
