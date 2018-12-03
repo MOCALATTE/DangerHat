@@ -5,7 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -16,13 +19,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
-import com.example.mocalatte.project1.adapter.FriendListAdapter;
-import com.example.mocalatte.project1.item.FriendListMenu;
 import com.example.mocalatte.project1.service.RealService;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
@@ -30,7 +30,7 @@ import com.kakao.usermgmt.callback.LogoutResponseCallback;
 import com.kakao.usermgmt.callback.UnLinkResponseCallback;
 import com.kakao.util.helper.log.Logger;
 
-import java.util.ArrayList;
+import static com.example.mocalatte.project1.ui.GlobalApplication.context;
 
 
 public class HomeActivity extends Activity {
@@ -39,14 +39,17 @@ public class HomeActivity extends Activity {
     private Intent serviceIntent;
 
     private boolean mLocationPermissionGranted;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    static final int PICK_CONTACT = 2;
+    private String people_Number;
+    private String people_Name;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_layout);
 
-        Button btn_logout = (Button)findViewById(R.id.button_logout);
+        Button btn_logout = (Button) findViewById(R.id.button_logout);
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,7 +62,7 @@ public class HomeActivity extends Activity {
             }
         });
 
-        Button btn_unlink = (Button)findViewById(R.id.button_unlink);
+        Button btn_unlink = (Button) findViewById(R.id.button_unlink);
         btn_unlink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,15 +70,17 @@ public class HomeActivity extends Activity {
             }
         });
 
-        ArrayList<FriendListMenu> fff = new ArrayList<>();
-        for(int i=0; i<5; i++)
-            fff.add(new FriendListMenu("홍길동", i+""));
+        Button btnTel = (Button) findViewById(R.id.btn_tel);
+        btnTel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent contact_picker = new Intent(Intent.ACTION_PICK);
+                contact_picker.setType(ContactsContract.Contacts.CONTENT_TYPE);
+                startActivityForResult(contact_picker, PICK_CONTACT);
+            }
+        });
 
-        ListView friendList = (ListView)findViewById(R.id.friendlist);
-        FriendListAdapter friendListAdapter = new FriendListAdapter(this, fff);
-        friendList.setAdapter(friendListAdapter);
-
-        ImageButton requestbtn = (ImageButton)findViewById(R.id.requestbutton);
+        ImageButton requestbtn = (ImageButton) findViewById(R.id.requestbutton);
         requestbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,17 +89,16 @@ public class HomeActivity extends Activity {
                 sp.edit().putBoolean("home_request_ok", !state).commit();
                 initRequestBtnState();
 
-                if(!state == true){
+                if (!state == true) {
                     Toast.makeText(HomeActivity.this, "앞으로 홈버튼을 7번 연속으로 클릭하시면 위험 알림을 발송하게 됩니다.", Toast.LENGTH_SHORT).show();
-                }
-                else{
+                } else {
                     Toast.makeText(HomeActivity.this, "홈버튼을 통한 위험 알림 발송기능을 중지합니다.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         initRequestBtnState();
 
-        final Switch push_switch = (Switch)findViewById(R.id.push_switch);
+        final Switch push_switch = (Switch) findViewById(R.id.push_switch);
         push_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -103,10 +107,9 @@ public class HomeActivity extends Activity {
                 sp.edit().putBoolean("push_switch", push_switch.isChecked()).commit();
                 initPushSwitchState();
 
-                if(push_switch.isChecked()){
+                if (push_switch.isChecked()) {
                     Toast.makeText(HomeActivity.this, "다른사람의 위험 요청 푸시를 수신합니다.", Toast.LENGTH_SHORT).show();
-                }
-                else{
+                } else {
                     Toast.makeText(HomeActivity.this, "다른사람의 위험 요청 푸시를 수신하지 않습니다.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -117,7 +120,7 @@ public class HomeActivity extends Activity {
 
         getLocationPermission();
 
-        if (RealService.serviceIntent==null) {
+        if (RealService.serviceIntent == null) {
             serviceIntent = new Intent(this, RealService.class);
             startService(serviceIntent);
         } else {
@@ -133,6 +136,43 @@ public class HomeActivity extends Activity {
             stopService(serviceIntent);
             serviceIntent = null;
         }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == PICK_CONTACT && resultCode == RESULT_OK){
+            Log.d("INNOVER", "request OK_PICKCONTACT");
+
+            Uri dataUri = data.getData();
+            Cursor cursor = managedQuery(dataUri, null, null, null, null);
+
+            while (cursor.moveToNext()) {
+                int getcolumnId = cursor.getColumnIndex(ContactsContract.Contacts._ID);
+
+                String id = cursor.getString(getcolumnId);
+                people_Name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME));
+                String hasPhoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+
+                if(hasPhoneNumber.equalsIgnoreCase("1")) {
+                    hasPhoneNumber = "true";
+                }else {
+                    hasPhoneNumber = "false";
+                }
+
+                if(Boolean.parseBoolean(hasPhoneNumber)) {
+                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID+" = "+id, null, null);
+                    while(phones.moveToNext()) {
+                        people_Number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                    }
+                    phones.close();	//	End
+                }
+                Log.d("test", "name: "+people_Name);
+                Log.d("test", "number: "+people_Number);
+                startActivity(new Intent("android.intent.action.CALL", Uri.parse("tel:"+people_Number)));
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     // 홈버튼 연속 클릭으로 자신의 위험을 알릴 것인지 아닌지를 결정하는 버튼 설정..
