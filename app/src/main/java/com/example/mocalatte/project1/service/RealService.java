@@ -199,7 +199,7 @@ public class RealService extends Service {
         super.onDestroy();
         serviceIntent = null;
         setAlarmTimer();
-        Thread.currentThread().interrupt();
+        //Thread.currentThread().interrupt();
 
         if (mainThread != null) {
             mainThread.interrupt();
