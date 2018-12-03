@@ -29,11 +29,9 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mocalatte.project1.R;
+import com.example.mocalatte.project1.adapter.ContactListAdapter;
 import com.example.mocalatte.project1.adapter.DBManager;
-import com.example.mocalatte.project1.adapter.FriendListAdapter;
-import com.example.mocalatte.project1.adapter.SosListAdapter;
 import com.example.mocalatte.project1.item.ContactItem;
-import com.example.mocalatte.project1.item.SosItem;
 import com.example.mocalatte.project1.service.RealService;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
@@ -55,7 +53,7 @@ public class HomeActivity extends Activity {
     private String people_Name;
     boolean friendlist = true;
     ArrayList<ContactItem> ContactItemList;
-    FriendListAdapter friendListAdapter;
+    ContactListAdapter friendListAdapter;
 
 
     @Override
@@ -105,7 +103,7 @@ public class HomeActivity extends Activity {
             }
         });
 
-        Button btnSos = (Button) findViewById(R.id.btn_sos);
+        /*Button btnSos = (Button) findViewById(R.id.btn_sos);
         btnSos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -134,7 +132,7 @@ public class HomeActivity extends Activity {
                     friendlist = true;
                 }
             }
-        });
+        });*/
 
 
         Button btnTel = (Button) findViewById(R.id.btn_tel);
@@ -185,8 +183,8 @@ public class HomeActivity extends Activity {
 
         //
         ContactItemList = new ArrayList<>();
-        ListView friendList = (ListView)findViewById(R.id.friendlist);
-        friendListAdapter = new FriendListAdapter(this, ContactItemList);
+        ListView friendList = (ListView)findViewById(R.id.lv_contactlist);
+        friendListAdapter = new ContactListAdapter(this, ContactItemList);
         friendList.setAdapter(friendListAdapter);
         initFriendList();
 

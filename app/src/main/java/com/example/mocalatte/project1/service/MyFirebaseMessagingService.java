@@ -1,5 +1,6 @@
 package com.example.mocalatte.project1.service;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -65,6 +67,10 @@ public class MyFirebaseMessagingService  extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);// Second param is Request code
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        // Sets an ID for the notification, so it can be updated.
+        int notifyID = 1;
+
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("위험 요청 수신!!")
@@ -72,11 +78,22 @@ public class MyFirebaseMessagingService  extends FirebaseMessagingService {
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
+                //.setChannelId();
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0, notificationBuilder.build()); // First param is ID of notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String CHANNEL_ID = "my_channel_01";// The id of the channel.
+            notificationBuilder.setChannelId(CHANNEL_ID);
+            CharSequence name = getString(R.string.channel_name);// The user-visible name of the channel.
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+
+            notificationManager.createNotificationChannel(mChannel);
+        }
+
+        notificationManager.notify(/*0*/notifyID, notificationBuilder.build()); // First param is ID of notification
 
         /*try {
             SimpleDateFormat dateFormat = new SimpleDateFormat(
